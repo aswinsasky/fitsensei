@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "C:/Tooler/projects/fitsenseai/linux"
+    "cmake.sourceDirectory": "C:/Tooler/projects/fitsenseai/linux",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

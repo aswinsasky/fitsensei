@@ -1,4 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+
+final _firebase = FirebaseAuth.instance;
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -10,13 +14,28 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   var enteredEmail = '';
+  final _passwordController = TextEditingController();
   var enteredPassword = '';
   var _isLogin = true;
   final _formkey = GlobalKey<FormState>();
-  void _submit() {
+  void _submit() async {
     final _isValid = _formkey.currentState!.validate();
-    if (_isValid) {
-      _formkey.currentState!.save();
+    if (!_isValid) {
+      return;
+    }
+    _formkey.currentState!.save();
+    if (_isLogin) {
+    } else {
+      try {
+        final userCredential = await _firebase.createUserWithEmailAndPassword(
+            email: enteredEmail, password: enteredPassword);
+        print(userCredential);
+      } on FirebaseAuthException catch (error) {
+        if (error.code == 'email-already-in-use') {}
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error.message ?? 'Authentication Failed')));
+      }
     }
   }
 
@@ -72,7 +91,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               if (value == null ||
                                   value.trim().isEmpty ||
                                   !value.contains('@')) {
-                                return 'Please enter a valid Password ';
+                                return 'Please enter a valid Email Address ';
                               }
                               return null;
                             },
@@ -81,8 +100,9 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                           ),
                           TextFormField(
+                            controller: _passwordController,
                             decoration:
-                                const InputDecoration(labelText: 'password'),
+                                const InputDecoration(labelText: 'Password'),
                             obscureText: true,
                             validator: (value) {
                               if (value == null || value.trim().length < 6) {
@@ -100,13 +120,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                       labelText: 'confirm password'),
                                   obscureText: true,
                                   validator: (value) {
-                                    if (value != enteredPassword) {
+                                    if (value != _passwordController.text) {
                                       return 'Password should match';
                                     }
                                     return null;
-                                  },
-                                  onSaved: (newValue) {
-                                    enteredPassword = newValue!;
                                   },
                                 )
                               : Container(),
