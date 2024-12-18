@@ -17,6 +17,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   var enteredPassword = '';
   var _isLogin = true;
+  var _isPressed = false;
   final _formkey = GlobalKey<FormState>();
   void _submit() async {
     final _isValid = _formkey.currentState!.validate();
@@ -24,26 +25,28 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
     _formkey.currentState!.save();
-    if (_isLogin) {
-    } else {
-      try {
+    try {
+      if (_isLogin) {
+        final userCredential = await _firebase.signInWithEmailAndPassword(
+            email: enteredEmail, password: enteredPassword);
+        print(userCredential);
+      } else {
         final userCredential = await _firebase.createUserWithEmailAndPassword(
             email: enteredEmail, password: enteredPassword);
         print(userCredential);
-      } on FirebaseAuthException catch (error) {
-        if (error.code == 'email-already-in-use') {}
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error.message ?? 'Authentication Failed')));
       }
+    } on FirebaseAuthException catch (error) {
+      if (error.code == 'email-already-in-use') {}
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message ?? 'Authentication Failed')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.black),
-      backgroundColor: const Color.fromARGB(255, 8, 8, 8),
+      backgroundColor: const Color.fromARGB(255, 7, 7, 7),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -67,6 +70,8 @@ class _AuthScreenState extends State<AuthScreen> {
                     fontWeight: FontWeight.w800),
               ),
               Card(
+                elevation: 20,
+                shadowColor: Colors.white,
                 margin: const EdgeInsets.all(30),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
@@ -101,9 +106,19 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                           TextFormField(
                             controller: _passwordController,
-                            decoration:
-                                const InputDecoration(labelText: 'Password'),
-                            obscureText: true,
+                            decoration: InputDecoration(
+                                labelText: 'Password',
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _isPressed = !_isPressed;
+                                    });
+                                  },
+                                  icon: Icon(_isPressed
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined),
+                                )),
+                            obscureText: _isPressed ? false : true,
                             validator: (value) {
                               if (value == null || value.trim().length < 6) {
                                 return 'Password must have more than 6 characters';

@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitsenseai/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:fitsenseai/screens/auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -23,7 +25,16 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
-      home: const AuthScreen(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return const MyHomePage();
+          } else {
+            return const AuthScreen();
+          }
+        },
+      ),
     );
   }
 }
