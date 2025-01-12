@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitsenseai/screens/home.dart';
+import 'package:fitsenseai/screens/newuser.dart';
 import 'package:flutter/material.dart';
 import 'package:fitsenseai/screens/auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return const MyHomePage();
+            return const NewUserScreen();
           } else {
             return const AuthScreen();
           }
